@@ -46,7 +46,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer">{{ $items->links() }}</div>
+        <div class="card-footer"></div>
     </div>
 @stop
 @push('js')
