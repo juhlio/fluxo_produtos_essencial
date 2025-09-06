@@ -1,5 +1,10 @@
 @extends('adminlte::page')
 
+@section('plugins.Datatables', true)
+@section('plugins.DatatablesPlugins', true)  {{-- Buttons/Responsive --}}
+@section('plugins.Toastr', true)
+@section('plugins.Sweetalert2', true)
+
 @section('title', "Solicitação #{$pr->id}")
 
 @section('content_header')
@@ -69,3 +74,30 @@
     </div>
 </div>
 @stop
+
+
+
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const formFinalizar = document.querySelector('form[action$="/finalizar"]');
+  if (formFinalizar) {
+    formFinalizar.addEventListener('submit', function (e) {
+      e.preventDefault();
+      Swal.fire({
+        title: 'Finalizar solicitação?',
+        text: 'Essa ação registrará a conclusão do fluxo.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, finalizar',
+        cancelButtonText: 'Cancelar'
+      }).then((res) => { if (res.isConfirmed) formFinalizar.submit(); });
+    });
+  }
+
+  // toast de sucesso (se houver)
+  @if(session('ok')) toastr.success("{{ session('ok') }}", "OK"); @endif
+});
+</script>
+@endpush
+

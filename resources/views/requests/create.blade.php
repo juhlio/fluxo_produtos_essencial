@@ -1,5 +1,10 @@
 @extends('adminlte::page')
 
+@section('plugins.Datatables', true)
+@section('plugins.DatatablesPlugins', true)  {{-- Buttons/Responsive --}}
+@section('plugins.Toastr', true)
+@section('plugins.Sweetalert2', true)
+
 @section('title', 'Nova Solicitação')
 
 @section('content_header')

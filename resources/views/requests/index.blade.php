@@ -1,10 +1,16 @@
+{{-- resources/views/requests/index.blade.php --}}
 @extends('adminlte::page')
 
-@section('title', 'Solicitações')
+@section('plugins.Datatables', true)
+@section('plugins.DatatablesPlugins', true)  {{-- Buttons/Responsive --}}
+@section('plugins.Toastr', true)
+@section('plugins.Sweetalert2', true)
 
+@section('title', 'Solicitações')
 @section('content_header')
     <h1>Solicitações</h1>
 @stop
+
 
 @section('content')
     @if(session('ok')) <x-adminlte-alert theme="success" title="OK" dismissable>{{ session('ok') }}</x-adminlte-alert> @endif
@@ -43,3 +49,32 @@
         <div class="card-footer">{{ $items->links() }}</div>
     </div>
 @stop
+@push('js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tbl = $('#tblSolicitacoes').DataTable({
+        pageLength: 10,
+        order: [[0, 'desc']],
+        responsive: true,
+        dom: 'Bfrtip',
+        buttons: [
+            { extend: 'copy', text: 'Copiar' },
+            { extend: 'csv',  text: 'CSV' },
+            { extend: 'excel', text: 'Excel' },
+            { extend: 'pdf',  text: 'PDF' },
+            { extend: 'print', text: 'Imprimir' },
+        ],
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json' }
+    });
+
+    // Move os botões pra cima da tabela
+    tbl.buttons().container().appendTo('.dataTables_wrapper .col-md-6:eq(0)');
+});
+</script>
+
+@if(session('ok'))
+<script>
+    toastr.success("{{ session('ok') }}", "OK");
+</script>
+@endif
+@endpush

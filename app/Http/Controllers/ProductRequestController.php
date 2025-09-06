@@ -15,7 +15,7 @@ class ProductRequestController extends Controller
 {
     public function index()
     {
-        $items = ProductRequest::latest()->paginate(20);
+        $items = \App\Models\ProductRequest::latest()->take(500)->get();
         return view('requests.index', compact('items'));
     }
 
