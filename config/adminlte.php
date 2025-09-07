@@ -304,6 +304,8 @@ return [
             ['header' => 'Cadastro de Produtos'],
             ['text' => 'Solicitações', 'route' => 'requests.index', 'icon' => 'fas fa-boxes'],
             ['text' => 'Nova solicitação', 'route' => 'requests.create', 'icon' => 'fas fa-plus'],
+            ['header' => 'Administração'],
+            ['text' => 'Usuários', 'route' => 'admin.users.index', 'icon' => 'fas fa-users', 'can' => 'admin'],
         ],
     ],
 

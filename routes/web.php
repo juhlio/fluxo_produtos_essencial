@@ -2,12 +2,19 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductRequestController;
+use App\Http\Controllers\Admin\UserController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
+
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')->name('admin.')
+    ->group(function () {
+        Route::resource('users', UserController::class);
+    });
 
 // Raiz do site: manda para /solicitacoes (se não estiver logado, Breeze redireciona para /login)
 Route::redirect('/', '/solicitacoes');
@@ -38,4 +45,4 @@ Route::middleware(['auth'])->prefix('solicitacoes')->group(function () {
 });
 
 // Rotas de autenticação geradas pelo Breeze
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
