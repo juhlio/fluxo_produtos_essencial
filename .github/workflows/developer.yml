@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - develop
+      - staging
 name: 🚀 Deploy no servidor de teste
 jobs:
   web-deploy:
