@@ -10,39 +10,53 @@ use App\Http\Controllers\Admin\UserController;
 |--------------------------------------------------------------------------
 */
 
-
-Route::middleware(['auth', 'verified', 'role:admin']) // <- exige e-mail verificado
+// Área Admin (autenticado, e-mail verificado e perfil admin)
+Route::middleware(['auth', 'verified', 'role:admin'])
     ->prefix('admin')->name('admin.')
-    ->group(fn() => Route::resource('users', \App\Http\Controllers\Admin\UserController::class));
+    ->group(function () {
+        Route::resource('users', UserController::class);
+    });
 
-
-// Raiz do site: manda para /solicitacoes (se não estiver logado, Breeze redireciona para /login)
+// Raiz: redireciona para a lista de solicitações
 Route::redirect('/', '/solicitacoes');
 
-// Rota que o Breeze usa após login (nome: dashboard)
-// Em vez de uma view, apenas redireciona para a lista de solicitações.
+// Rota padrão do Breeze após login -> envia para solicitações
 Route::redirect('/dashboard', '/solicitacoes')
-    ->middleware(['auth'])   // deixe só 'auth' para não travar em verificação de e-mail
+    ->middleware(['auth'])
     ->name('dashboard');
 
-// 🔒 Todas as rotas do seu módulo protegidas por autenticação
-Route::middleware(['auth'])->prefix('solicitacoes')->group(function () {
-    Route::get('/', [ProductRequestController::class, 'index'])->name('requests.index');
-    Route::get('/nova', [ProductRequestController::class, 'create'])->name('requests.create');
-    Route::post('/', [ProductRequestController::class, 'store'])->name('requests.store');
+// 🔒 Módulo de solicitações (tudo autenticado)
+Route::middleware(['auth'])
+    ->prefix('solicitacoes')
+    ->name('requests.')
+    ->group(function () {
+        Route::get('/', [ProductRequestController::class, 'index'])->name('index');
+        Route::get('/nova', [ProductRequestController::class, 'create'])->name('create');
+        Route::post('/', [ProductRequestController::class, 'store'])->name('store');
 
-    Route::get('/{id}', [ProductRequestController::class, 'show'])->name('requests.show');
-    Route::get('/{id}/editar', [ProductRequestController::class, 'edit'])->name('requests.edit');
+        Route::get('/{id}', [ProductRequestController::class, 'show'])
+            ->whereNumber('id')->name('show');
+        Route::get('/{id}/editar', [ProductRequestController::class, 'edit'])
+            ->whereNumber('id')->name('edit');
 
-    Route::put('/{id}/estoque', [ProductRequestController::class, 'updateEstoque'])->name('requests.update.estoque');
-    Route::put('/{id}/fiscal', [ProductRequestController::class, 'updateFiscal'])->name('requests.update.fiscal');
+        // Atualizações por setor
+        Route::put('/{id}/estoque', [ProductRequestController::class, 'updateEstoque'])
+            ->whereNumber('id')->name('update.estoque');
+        Route::put('/{id}/fiscal', [ProductRequestController::class, 'updateFiscal'])
+            ->whereNumber('id')->name('update.fiscal');
 
-    Route::post('/{id}/enviar/{proximo}', [ProductRequestController::class, 'enviar'])->name('requests.enviar');
-    Route::post('/{id}/devolver', [ProductRequestController::class, 'devolver'])->name('requests.devolver');
-    Route::post('/{id}/finalizar', [ProductRequestController::class, 'finalizar'])->name('requests.finalizar');
+        // Fluxo
+        Route::post('/{id}/enviar/{proximo}', [ProductRequestController::class, 'enviar'])
+            ->whereNumber('id')->name('enviar');
+        Route::post('/{id}/devolver', [ProductRequestController::class, 'devolver'])
+            ->whereNumber('id')->name('devolver');
+        Route::post('/{id}/finalizar', [ProductRequestController::class, 'finalizar'])
+            ->whereNumber('id')->name('finalizar');
 
-    Route::post('/{id}/anexos', [ProductRequestController::class, 'upload'])->name('requests.attach');
-});
+        // Anexos
+        Route::post('/{id}/anexos', [ProductRequestController::class, 'upload'])
+            ->whereNumber('id')->name('attach');
+    });
 
-// Rotas de autenticação geradas pelo Breeze
+// Rotas de autenticação do Breeze
 require __DIR__ . '/auth.php';
