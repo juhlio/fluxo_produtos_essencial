@@ -15,17 +15,20 @@ class PreProduct extends Model
     ];
 
     protected $casts = [
-        'tem_st' => 'bool',
-        'retencao_iss' => 'bool',
-        'fiscal_rules' => 'array',
-        'peso' => 'decimal:3',
-        'aliq_icms' => 'decimal:2',
-        'aliq_pis' => 'decimal:2',
-        'aliq_cofins' => 'decimal:2',
-        'aliq_ipi' => 'decimal:2',
-        'aliq_iss' => 'decimal:2',
-        'mva_st' => 'decimal:2',
+        'tem_st'        => 'bool',
+        'retencao_iss'  => 'bool',
+        'fiscal_rules'  => 'array',
+        'peso'          => 'decimal:3',
+        'aliq_icms'     => 'decimal:2',
+        'aliq_ipi'      => 'decimal:2',
+        'aliq_pis'      => 'decimal:2',
+        'aliq_cofins'   => 'decimal:2',
+        'aliq_iss'      => 'decimal:2',
+        'mva_st'        => 'decimal:2',
     ];
 
-    public function request(){ return $this->belongsTo(ProductRequest::class, 'product_request_id'); }
+    public function request()
+    {
+        return $this->belongsTo(ProductRequest::class, 'product_request_id');
+    }
 }

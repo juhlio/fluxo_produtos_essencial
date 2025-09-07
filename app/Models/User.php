@@ -2,21 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Role;
 
-
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Atributos preenchíveis.
      */
     protected $fillable = [
         'name',
@@ -25,9 +21,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Atributos ocultos nas serializações.
      */
     protected $hidden = [
         'password',
@@ -35,20 +29,46 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Casts.
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
+    ];
+
+    /* =========================
+     |  RELACIONAMENTOS
+     |=========================*/
+
+    /**
+     * Papéis do usuário (pivot: role_user).
+     */
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')
-            ->wherePivot('model_type', self::class);
+        // Role está no mesmo namespace App\Models
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
+
+    /* =========================
+     |  HELPERS DE PAPÉIS
+     |=========================*/
+
+    /** Verifica se possui um papel específico. */
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    /** Verifica se possui algum dos papéis. */
+    public function hasAnyRole(array|string $roles): bool
+    {
+        $roles = is_array($roles) ? $roles : [$roles];
+        return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
+    /** Atalho para admin. */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
     }
 }
