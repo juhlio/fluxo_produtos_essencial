@@ -10,11 +10,11 @@ use App\Http\Controllers\Admin\UserController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin'])
+
+Route::middleware(['auth', 'verified', 'role:admin']) // <- exige e-mail verificado
     ->prefix('admin')->name('admin.')
-    ->group(function () {
-        Route::resource('users', UserController::class);
-    });
+    ->group(fn() => Route::resource('users', \App\Http\Controllers\Admin\UserController::class));
+
 
 // Raiz do site: manda para /solicitacoes (se não estiver logado, Breeze redireciona para /login)
 Route::redirect('/', '/solicitacoes');
