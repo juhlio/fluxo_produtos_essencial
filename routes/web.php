@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\UserController;
 */
 
 // Área Admin (autenticado, e-mail verificado e perfil admin)
-Route::middleware(['auth', 'verified', 'role:admin'])
+Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')->name('admin.')
     ->group(function () {
         Route::resource('users', UserController::class);

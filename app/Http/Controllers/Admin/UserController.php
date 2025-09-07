@@ -3,121 +3,83 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use App\Models\Role;
-use Illuminate\Support\Facades\DB;
-use App\Events\UserRolesChanged;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-   public function index()
-    {
-        // traz usuários e papéis para a view (para filtros)
-        $users = User::with('roles')->orderByDesc('id')->get();
-        $roles = Role::orderBy('name')->pluck('name');
-        return view('admin.users.index', compact('users','roles'));
-    }
+    public function index()
+{
+    $users = \App\Models\User::with('roles')->latest()->paginate(20);
+    $roles = Role::orderBy('name')->get(); // <— AQUI
+
+    return view('admin.users.index', compact('users', 'roles')); // <— AQUI
+}
 
     public function create()
     {
-        $roles = Role::orderBy('name')->pluck('name');
-        return view('admin.users.create', compact('roles'));
+        $roles = Role::orderBy('name')->get();
+        $user  = new User();
+        return view('admin.users.create', compact('user','roles'));
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(Request $request)
     {
-        $user = User::create([
-            'name'  => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'email_verified_at' => now(),
+        $data = $request->validate([
+            'name'     => ['required','string','max:255'],
+            'email'    => ['required','email','max:255','unique:users,email'],
+            'password' => ['required','string','min:6','confirmed'],
+            'roles'    => ['array'],          // roles[]
+            'roles.*'  => ['integer','exists:roles,id'],
         ]);
 
-        $roleIds = Role::whereIn('name', $request->roles ?? [])->pluck('id')->all();
-        if ($roleIds) {
-            $rows = array_map(fn ($rid) => [
-                'role_id'    => $rid,
-                'model_type' => User::class,
-                'model_id'   => $user->id,
-            ], $roleIds);
-            DB::table('model_has_roles')->insert($rows);
-        }
+        $user = User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
 
-        // log (criação com papéis)
-        event(new UserRolesChanged(auth()->user(), $user, [], $request->roles ?? []));
+        // vincula papéis na pivô
+        $user->roles()->sync($data['roles'] ?? []);
 
-        return redirect()->route('admin.users.index')->with('ok', 'Usuário criado.');
+        return redirect()->route('admin.users.index')->with('success', 'Usuário criado!');
     }
 
     public function edit(User $user)
     {
-        $roles = Role::orderBy('name')->pluck('name');
-        $userRoles = $user->roles->pluck('name')->all();
-        return view('admin.users.edit', compact('user', 'roles', 'userRoles'));
+        $roles = Role::orderBy('name')->get();
+        $user->load('roles');
+        return view('admin.users.edit', compact('user','roles'));
     }
 
-     public function update(UpdateUserRequest $request, User $user)
+    public function update(Request $request, User $user)
     {
-        $user->fill($request->only('name','email'));
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
+        $data = $request->validate([
+            'name'     => ['required','string','max:255'],
+            'email'    => ['required','email','max:255','unique:users,email,'.$user->id],
+            'password' => ['nullable','string','min:6','confirmed'],
+            'roles'    => ['array'],
+            'roles.*'  => ['integer','exists:roles,id'],
+        ]);
+
+        $user->name  = $data['name'];
+        $user->email = $data['email'];
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
         }
         $user->save();
 
-        // papéis atuais (antes)
-        $before = DB::table('roles as r')
-            ->join('model_has_roles as mr', 'mr.role_id', '=', 'r.id')
-            ->where('mr.model_type', User::class)
-            ->where('mr.model_id', $user->id)
-            ->pluck('r.name')->sort()->values()->all();
+        // atualiza a pivô (remove os que saíram e adiciona novos)
+        $user->roles()->sync($data['roles'] ?? []);
 
-        $after = $request->roles ? array_values(array_unique($request->roles)) : [];
-
-        // Bloqueia remover o próprio admin
-        if (auth()->id() === $user->id) {
-            $hadAdmin = in_array('admin', $before, true);
-            $willHaveAdmin = in_array('admin', $after, true);
-            if ($hadAdmin && !$willHaveAdmin) {
-                return back()
-                    ->with('error', 'Você não pode remover o próprio papel admin.')
-                    ->withInput();
-            }
-        }
-
-        // limpa vínculos e recria conforme $after
-        DB::table('model_has_roles')
-            ->where('model_type', User::class)
-            ->where('model_id', $user->id)
-            ->delete();
-
-        if ($after) {
-            $roleIds = Role::whereIn('name', $after)->pluck('id')->all();
-            if ($roleIds) {
-                $rows = array_map(fn ($rid) => [
-                    'role_id'    => $rid,
-                    'model_type' => User::class,
-                    'model_id'   => $user->id,
-                ], $roleIds);
-                DB::table('model_has_roles')->insert($rows);
-            }
-        }
-
-        // log (mudança de papéis)
-        event(new UserRolesChanged(auth()->user(), $user, $before, $after));
-
-        return redirect()->route('admin.users.index')->with('ok', 'Usuário atualizado.');
+        return redirect()->route('admin.users.index')->with('success', 'Usuário atualizado!');
     }
 
     public function destroy(User $user)
     {
-        if (auth()->id() === $user->id) {
-            return back()->with('error', 'Você não pode excluir a si mesmo.');
-        }
         $user->delete();
-        return redirect()->route('admin.users.index')->with('ok', 'Usuário excluído.');
+        return back()->with('success', 'Usuário removido!');
     }
 }
