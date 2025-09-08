@@ -11,11 +11,11 @@ use App\Http\Controllers\Admin\UserController;
 */
 
 // Área Admin (autenticado, e-mail verificado e perfil admin)
-Route::middleware(['auth', 'role:admin'])
+Route::middleware(['auth', 'acl:admin'])
     ->prefix('admin')->name('admin.')
     ->group(function () {
-        Route::resource('users', UserController::class);
-    });
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    });;
 
 // Raiz: redireciona para a lista de solicitações
 Route::redirect('/', '/solicitacoes');
