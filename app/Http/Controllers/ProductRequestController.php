@@ -11,6 +11,7 @@ use App\Models\User; // fallback de checagem de papel, caso não use Spatie
 use App\Services\RequestWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 
 class ProductRequestController extends Controller
 {
@@ -35,9 +36,18 @@ class ProductRequestController extends Controller
             'current_sector'  => 'SOLICITANTE',
         ]);
 
+        $validated = $req->validated();
+        $extrasFields = [
+            'codigo','tipo','armazem_padrao','grupo','grupo_trib','cont_seg_soc','imposto_renda','calcula_inss',
+            'red_inss','red_irrf','red_pis','red_cofins','perc_pis','perc_cofins','perc_csll','proprio_icms',
+            'icms_pauta','ipi_pauta','aliq_famad','aliq_fecp','solid_saida','solid_entrada','imp_zfranca',
+        ];
+        $extras = Arr::only($validated, $extrasFields);
+        $data   = Arr::except($validated, $extrasFields);
+
         PreProduct::create(array_merge(
-            ['product_request_id' => $pr->id],
-            $req->validated()
+            ['product_request_id' => $pr->id, 'extras' => $extras],
+            $data
         ));
 
         // log de criação
