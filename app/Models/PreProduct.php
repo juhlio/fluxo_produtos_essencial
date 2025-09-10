@@ -11,7 +11,7 @@ class PreProduct extends Model
         'conta_contabil','natureza','centro_custo_padrao',
         'ncm','cest','origem','cfop_entrada','cfop_saida','cst_icms','csosn','aliq_icms','aliq_ipi',
         'cst_pis','aliq_pis','cst_cofins','aliq_cofins','tem_st','mva_st',
-        'cod_servico_municipal','aliq_iss','retencao_iss','fiscal_rules'
+        'cod_servico_municipal','aliq_iss','retencao_iss','fiscal_rules','extras'
     ];
 
     protected $casts = [
@@ -25,6 +25,7 @@ class PreProduct extends Model
         'aliq_cofins'   => 'decimal:2',
         'aliq_iss'      => 'decimal:2',
         'mva_st'        => 'decimal:2',
+        'extras'        => 'array',
     ];
 
     public function request()
