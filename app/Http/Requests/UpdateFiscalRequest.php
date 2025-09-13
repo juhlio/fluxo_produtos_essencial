@@ -6,38 +6,40 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateFiscalRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return $this->user() && (
-            method_exists($this->user(), 'hasAnyRole')
-                ? $this->user()->hasAnyRole(['admin','fiscal','contabil'])
-                : true
-        );
-    }
+    public function authorize(): bool { return true; }
 
     public function rules(): array
     {
         return [
-            'ncm'                  => ['required','string','max:10'],
-            'origem'               => ['required','string','max:2'],
-            'cfop_entrada'         => ['nullable','string','max:5'],
-            'cfop_saida'           => ['nullable','string','max:5'],
-            'cst_icms'             => ['nullable','string','max:3'],
-            'csosn'                => ['nullable','string','max:3'],
-            'aliq_icms'            => ['nullable','numeric'],
-            'aliq_ipi'             => ['nullable','numeric'],
-            'cst_pis'              => ['nullable','string','max:2'],
-            'aliq_pis'             => ['nullable','numeric'],
-            'cst_cofins'           => ['nullable','string','max:2'],
-            'aliq_cofins'          => ['nullable','numeric'],
-            'tem_st'               => ['nullable','boolean'],
-            'mva_st'               => ['nullable','numeric'],
-            'cod_servico_municipal'=> ['nullable','string','max:20'],
-            'aliq_iss'             => ['nullable','numeric'],
-            'retencao_iss'         => ['nullable','boolean'],
-            'conta_contabil'       => ['nullable','string','max:100'],
-            'natureza'             => ['nullable','string','max:100'],
-            'centro_custo_padrao'  => ['nullable','string','max:100'],
+            'ncm'           => ['nullable','string','max:20'],
+            'cest'          => ['nullable','string','max:20'],
+            'grupo_trib'    => ['nullable','string','max:50'],
+            'cont_seg_soc'  => ['nullable','string','max:50'],
+            'imposto_renda' => ['nullable','string','max:50'],
+            'calcula_inss'  => ['nullable','in:S,N'],
+
+            'aliq_icms' => ['nullable','string'],
+            'aliq_ipi'  => ['nullable','string'],
+            'aliq_iss'  => ['nullable','string'],
+            'perc_pis'  => ['nullable','string'],
+            'perc_cofins'=> ['nullable','string'],
+            'perc_csll' => ['nullable','string'],
+            'red_inss'  => ['nullable','string'],
+            'red_irrf'  => ['nullable','string'],
+            'red_pis'   => ['nullable','string'],
+            'red_cofins'=> ['nullable','string'],
+            'proprio_icms'=> ['nullable','string'],
+            'icms_pauta' => ['nullable','string'],
+            'ipi_pauta'  => ['nullable','string'],
+            'aliq_famad' => ['nullable','string'],
+            'aliq_fecp'  => ['nullable','string'],
+            'solid_saida'=> ['nullable','string'],
+            'solid_entrada'=> ['nullable','string'],
+            'imp_zfranca'=> ['nullable','string'],
+
+            // flags
+            'tem_st'       => ['nullable','boolean'],
+            'retencao_iss' => ['nullable','boolean'],
         ];
     }
 }
