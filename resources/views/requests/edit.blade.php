@@ -36,8 +36,15 @@
           <div class="card-header d-flex align-items-center">
             <i class="fas fa-box-open mr-2 text-primary"></i>
             <b>Estoque</b>
+            @unless(($canBasic ?? false))
+              <span class="ml-2 badge badge-light" title="Somente leitura">
+                <i class="fas fa-lock mr-1"></i>Somente leitura
+              </span>
+            @endunless
           </div>
 
+          {{-- Tudo da seção fica dentro de um fieldset que desabilita os campos --}}
+          <fieldset {{ ($canBasic ?? false) ? '' : 'disabled' }}>
           <div class="card-body">
 
             <div class="form-group">
@@ -301,6 +308,7 @@
             </div>
 
           </div>
+          </fieldset>
         </div>
       </div>
 
@@ -310,8 +318,14 @@
           <div class="card-header d-flex align-items-center">
             <i class="fas fa-file-invoice-dollar mr-2 text-success"></i>
             <b>Fiscal / Impostos</b>
+            @unless(($canFiscal ?? false))
+              <span class="ml-2 badge badge-light" title="Somente leitura">
+                <i class="fas fa-lock mr-1"></i>Somente leitura
+              </span>
+            @endunless
           </div>
 
+          <fieldset {{ ($canFiscal ?? false) ? '' : 'disabled' }}>
           <div class="card-body">
             <div class="form-row">
               <div class="form-group col-md-6">
@@ -436,25 +450,6 @@
 
             <div class="form-row">
               <div class="form-group col-md-6">
-                <label class="text-success">% Red. PIS</label>
-                <div class="input-group">
-                  <input name="fiscal[red_pis]" type="number" step="0.01" inputmode="decimal" class="form-control"
-                         value="{{ old('fiscal.red_pis', $fiscal?->red_pis) }}">
-                  <div class="input-group-append"><span class="input-group-text">%</span></div>
-                </div>
-              </div>
-              <div class="form-group col-md-6">
-                <label class="text-success">% Red. COFINS</label>
-                <div class="input-group">
-                  <input name="fiscal[red_cofins]" type="number" step="0.01" inputmode="decimal" class="form-control"
-                         value="{{ old('fiscal.red_cofins', $fiscal?->red_cofins) }}">
-                  <div class="input-group-append"><span class="input-group-text">%</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group col-md-6">
                 <label class="text-success">% PIS</label>
                 <div class="input-group">
                   <input name="fiscal[perc_pis]" type="number" step="0.01" inputmode="decimal" class="form-control"
@@ -535,19 +530,21 @@
               <input name="fiscal[imp_zfranca]" type="number" step="0.01" inputmode="decimal" class="form-control"
                      value="{{ old('fiscal.imp_zfranca', $fiscal?->imp_zfranca) }}">
             </div>
-
           </div>
+          </fieldset>
         </div>
       </div>
 
     </div>
   </div>
 
+  @php($canSubmit = ($canBasic ?? false) || ($canFiscal ?? false))
+
   <div class="card-footer d-flex justify-content-between">
     <a href="{{ route('requests.show', $pr->id) }}" class="btn btn-default">
       <i class="fas fa-times"></i> Cancelar
     </a>
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary" {{ $canSubmit ? '' : 'disabled' }}>
       <i class="fas fa-save"></i> Salvar
     </button>
   </div>
