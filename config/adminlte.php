@@ -299,15 +299,53 @@ return [
     |
     */
 
-    'menu' => [
-        [
-            ['header' => 'Cadastro de Produtos'],
-            ['text' => 'Solicitações', 'route' => 'requests.index', 'icon' => 'fas fa-boxes'],
-            ['text' => 'Nova solicitação', 'route' => 'requests.create', 'icon' => 'fas fa-plus'],
-            ['header' => 'Administração'],
-            ['text' => 'Usuários', 'route' => 'admin.users.index', 'icon' => 'fas fa-users', 'can' => 'admin'],
+'menu' => [
+    ['header' => 'NAVEGAÇÃO'],
+
+    [
+        'text'   => 'Dashboard',
+        'icon'   => 'fas fa-tachometer-alt',
+        'url'    => 'solicitacoes',
+        'active' => ['solicitacoes', 'home'],
+    ],
+
+    [
+        'text'   => 'Solicitações',
+        'icon'   => 'far fa-clipboard',
+        'active' => ['solicitacoes*'],
+        'submenu'=> [
+            [
+                'text' => 'Nova Solicitação',
+                'icon' => 'fas fa-plus',
+                'url'  => 'solicitacoes/nova',
+            ],
         ],
     ],
+
+    // ====== SOMENTE ADMIN ======
+    [
+        'text'   => 'Usuários',
+        'icon'   => 'fas fa-users-cog',
+        'can'    => 'admin',              // <<< restrição
+        'active' => ['usuarios*'],
+        'submenu'=> [
+            [
+                'text' => 'Gerenciar',
+                'icon' => 'fas fa-user-shield',
+                'url'  => 'admin/users',     // ex.: lista de usuários
+            ],
+            [
+                'text' => 'Novo usuário',
+                'icon' => 'fas fa-user-plus',
+                'url'  => 'admin/users/create', // ex.: form de criação
+            ],
+        ],
+        'label'       => 'admin',
+        'label_color' => 'danger',
+    ],
+],
+
+
 
     /*
     |--------------------------------------------------------------------------
