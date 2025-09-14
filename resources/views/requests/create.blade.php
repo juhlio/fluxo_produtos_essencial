@@ -65,7 +65,7 @@
                         $valorUn = old('unidade');
                         @endphp
 
-                        <label>Unidade de medida</label>
+                        <label>Unidade de medida*</label>
                         <select name="unidade" class="form-control">
                             <option value="">Selecione</option>
                             @foreach ($unidades as $sigla => $descricao)
@@ -78,37 +78,37 @@
                     </div>
 
                     <div class="col-md-3 form-group">
-                        <label>Marca</label>
+                        <label>Marca*</label>
                         <input name="marca" class="form-control" value="{{ old('marca') }}">
                     </div>
                     <div class="col-md-3 form-group">
-                        <label>Modelo</label>
+                        <label>Modelo*</label>
                         <input name="modelo" class="form-control" value="{{ old('modelo') }}">
                     </div>
                     <div class="col-md-3 form-group">
-                        <label>SKU</label>
+                        <label>SKU*</label>
                         <input name="sku" class="form-control" value="{{ old('sku') }}">
                     </div>
 
                     <div class="col-md-4 form-group">
-                        <label>Família</label>
+                        <label>Família*</label>
                         <input name="familia" class="form-control" value="{{ old('familia') }}">
                     </div>
                     <div class="col-md-4 form-group">
-                        <label>Peso</label>
+                        <label>Peso*</label>
                         <input name="peso" type="number" step="0.0001" inputmode="decimal" class="form-control" value="{{ old('peso') }}">
                     </div>
                     <div class="col-md-4 form-group">
-                        <label>Dimensões</label>
+                        <label>Dimensões*</label>
                         <input name="dimensoes" class="form-control" value="{{ old('dimensoes') }}" placeholder="CxLxA ou livre">
                     </div>
 
                     <div class="col-md-3 form-group">
-                        <label>Código</label>
+                        <label>Código*</label>
                         <input name="codigo" class="form-control" value="{{ old('codigo') }}">
                     </div>
                     <div class="col-md-3 form-group">
-                        <label>Tipo</label>
+                        <label>Tipo*</label>
                         <input name="tipo" class="form-control" value="{{ old('tipo') }}" placeholder="ex.: ME">
                     </div>
                     <div class="col-md-3 form-group">
