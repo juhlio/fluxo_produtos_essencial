@@ -3,10 +3,11 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,47 +24,62 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        DB::listen(function ($q) {
-            Log::info('SQL', ['sql' => $q->sql, 'bindings' => $q->bindings]);
-        });
+        // (Opcional) Log de SQL quando precisar
+        // DB::listen(function ($q) {
+        //     Log::info('SQL', ['sql' => $q->sql, 'bindings' => $q->bindings]);
+        // });
 
+        /**
+         * Gate "admin" (usada no menu do AdminLTE e onde mais precisar).
+         * Funciona tanto com Spatie\Permission (hasRole) quanto com coluna "role".
+         */
         Gate::define('admin', function (User $u) {
-            // 1) Coluna 'role' em users
-            if (isset($u->role) && $u->role === 'admin') {
-                return true;
-            }
-
-            // 2) Relação via Spatie (se o trait estiver no model)
+            // Spatie\Permission
             if (method_exists($u, 'hasRole')) {
                 try {
-                    if ($u->hasRole('admin')) return true;
-                } catch (\Throwable $e) { /* segue o jogo */
+                    if ($u->hasRole('admin')) {
+                        return true;
+                    }
+                } catch (\Throwable $e) {
+                    // ignora
                 }
             }
 
-            // 3) Consulta direta nas tabelas do Spatie (sem trait)
-            try {
-                $exists = DB::table('model_has_roles as mr')
-                    ->join('roles as r', 'r.id', '=', 'mr.role_id')
-                    ->where('mr.model_type', User::class)
-                    ->where('mr.model_id', $u->id)
-                    ->where('r.name', 'admin')
-                    ->exists();
-
-                if ($exists) return true;
-            } catch (\Throwable $e) { /* tabela pode não existir */
-            }
-
-            return false;
+            // Fallback: coluna "role"
+            return strtolower($u->role ?? '') === 'admin';
         });
 
-        /*  Gate::define('admin', function (User $u) {
-            return DB::table('model_has_roles as mr')
-                ->join('roles as r', 'r.id', '=', 'mr.role_id')
-                ->where('mr.model_type', User::class)
-                ->where('mr.model_id', $u->id)
-                ->where('r.name', 'admin')
-                ->exists();
-        }); */
+        /**
+         * Publica $canBasic / $canFiscal em TODAS as views.
+         * Assim o Blade nunca dá "Undefined variable".
+         */
+        View::composer('*', function ($view) {
+            $u = auth()->user();
+
+            $hasAny = function (?User $user, array $roles): bool {
+                if (!$user) return false;
+
+                // Spatie: hasAnyRole()
+                if (method_exists($user, 'hasAnyRole')) {
+                    try {
+                        return $user->hasAnyRole($roles);
+                    } catch (\Throwable $e) {
+                        // ignora e cai no fallback
+                    }
+                }
+
+                // Fallback coluna "role"
+                $r = strtolower($user->role ?? '');
+                foreach ($roles as $want) {
+                    if ($r === strtolower($want)) return true;
+                }
+                return false;
+            };
+
+            $canBasic  = $hasAny($u, ['admin', 'estoque']); // Estoque/Cadastrais
+            $canFiscal = $hasAny($u, ['admin', 'fiscal']);  // Fiscal/Impostos
+
+            $view->with(compact('canBasic', 'canFiscal'));
+        });
     }
 }
