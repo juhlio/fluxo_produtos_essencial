@@ -131,7 +131,8 @@ class RequestController extends Controller
     public function show(ProductRequest $requestItem)
     {
         $requestItem->load('preProduct');
-        return view('requests.show', ['item' => $requestItem]);
+        $unidades = config('unidades');
+        return view('requests.show', ['item' => $requestItem, 'unidades' => $unidades]);
     }
 
     /**

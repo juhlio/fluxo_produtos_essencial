@@ -44,24 +44,7 @@
             <li class="nav-item">
                 <a class="nav-link" id="tab-impostos" data-toggle="tab" href="#pane-impostos" role="tab">Impostos</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" style="pointer-events:none;opacity:.5">MRP / Suprimentos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" style="pointer-events:none;opacity:.5">C.Q.</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" style="pointer-events:none;opacity:.5">Atendimento</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" style="pointer-events:none;opacity:.5">Direitos autorais</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" style="pointer-events:none;opacity:.5">Garantia Estendida</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" style="pointer-events:none;opacity:.5">Outros</a>
-            </li>
+
         </ul>
 
         <div class="tab-content border p-3" id="tabsProdutoContent">
@@ -77,9 +60,23 @@
                     </div>
 
                     <div class="col-md-3 form-group">
-                        <label>Unidade</label>
-                        <input name="unidade" class="form-control" value="{{ old('unidade') }}">
+                        @php
+                        $unidades = config('unidades', []); // carrega do config
+                        $valorUn = old('unidade');
+                        @endphp
+
+                        <label>Unidade de medida</label>
+                        <select name="unidade" class="form-control">
+                            <option value="">Selecione</option>
+                            @foreach ($unidades as $sigla => $descricao)
+                            <option value="{{ $sigla }}" {{ $valorUn === $sigla ? 'selected' : '' }}>
+                                {{ $descricao }}
+                            </option>
+                            @endforeach
+                        </select>
+
                     </div>
+
                     <div class="col-md-3 form-group">
                         <label>Marca</label>
                         <input name="marca" class="form-control" value="{{ old('marca') }}">
@@ -106,7 +103,6 @@
                         <input name="dimensoes" class="form-control" value="{{ old('dimensoes') }}" placeholder="CxLxA ou livre">
                     </div>
 
-                    {{-- Campos adicionais dos prints (Protheus) --}}
                     <div class="col-md-3 form-group">
                         <label>Código</label>
                         <input name="codigo" class="form-control" value="{{ old('codigo') }}">
